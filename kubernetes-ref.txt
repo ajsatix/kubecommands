@@ -1,0 +1,268 @@
+# Create cronjob
+kubectl create cronjob  testpod --image=busybox --restart=OnFailure --schedule='* * * * *' --dry-run=client -o yaml > cron.yaml
+
+# Create job
+kubectl create cronjob  testpod --image=busybox --restart=OnFailure --schedule='* * * * *' --dry-run=client -o yaml > cron.yaml
+
+#create pod
+kubectl run testpod --image=busybox --restart=Never --namespace=xyz --requests='cpu=200m,memory=400m' --limits='cpu=400m,memory=800m' --dry-run=client -o yaml > pod.yaml
+
+# Confimap
+kubectl create cofigmap time-config --from-literal=TIME_FREQ=10
+
+# Namespace
+kubectl create ns dvl1987
+
+#Deployment
+kubectl create deployment redis-app --image=redis --replicas=3 --dry-run=client -o yaml > deploy.yaml
+
+kubectl run busybox --image=busybox --command --restart=Never --namespace=mynamespace -- env
+
+kubectl set-context --current --namespace=mynamespace
+
+kubectl run nginx --image=nginx --restart=Never --namespace=mynamespace -o yaml > nginx.yaml
+
+kubectl run busybox --image=busybox --dry-run=client --restart=Never --namespace=mynamespace -o yaml --command  -- env > busy.yaml
+
+kubectl create namespace myns --dry-run=client -o yaml > myns.yaml
+
+##Resource Quota
+kubectl create quota myrq --hard=cpu=1,memory=1G,pods=2 --dry-run=client -o yaml
+
+{
+kubectl get pods --all-namespaces
+kubectl get po -A
+}
+
+kubectl run nginx --image=nginx --restart=Never --port=80
+
+# kubectl set image POD/POD_NAME CONTAINER_NAME=IMAGE_NAME:TAG
+kubectl set image pod/nginx nginx=nginx:1.7.1 --record
+kubectl describe po nginx # you will see an event 'Container will be killed and recreated'
+kubectl get po nginx -w # watch it
+
+kubectl get po nginx -o jsonpath='{.spec.containers[].image}{"\n"}'
+
+# Temporary busybox 
+kubectl run busybox --image=busybox --rm -it --restart=Never -- wget -O- 10.1.1.131:80
+# Alternate 
+# Get IP of the nginx pod
+NGINX_IP=$(kubectl get pod nginx -o jsonpath='{.status.podIP}')
+# create a temp busybox pod
+kubectl run busybox --image=busybox --env="NGINX_IP=$NGINX_IP" --rm -it --restart=Never -- sh -c 'wget -O- $NGINX_IP:80'
+
+#get logs for previous instance
+kubectl logs nginx -p
+
+kubectl run busybox --image=busybox -it --restart=Never -- echo 'hello world'
+# or
+kubectl run busybox --image=busybox -it --restart=Never -- /bin/sh -c 'echo hello world'
+# Delete after running
+kubectl run busbbox --image=busybox --restart=Never -it --rm -- echo 'Hello world'
+kubectl run nginx --image=nginx --restart=Never --env=var1=val1
+
+kubectl run nginx1 --image=nginx --restart=Never --labels=app=v1
+kubectl run nginx2 --image=nginx --restart=Never --labels=app=v1
+kubectl run nginx3 --image=nginx --restart=Never --labels=app=v1
+
+kubectl get po --show-labels
+# Fore renaming or changing label
+kubectl label po nginx2 app=v2 --overwrite
+
+{
+kubectl get po -L app
+kubectl get po --label-columns=app
+}
+
+kubectl get po -l app=v2
+# or
+kubectl get po -l 'app in (v2)'
+# or
+kubectl get po --selector=app=v2
+
+#Remove labels
+kubectl label po nginx1 nginx2 nginx3 app-
+
+kubectl annotate po nginx1 nginx2 nginx3 description='my description'
+kubectl describe po nginx1 | grep -i 'annotations'
+# remove annotation
+kubectl annotate po nginx{1..3} description-
+
+kubectl create deployment dply --image=nginx:1.7.8 --replicas=2 --port=80 --dry-run=client -o yaml > deployment.yaml
+kubectl describe deploy nginx
+kubectl describe deployment dply
+kubectl get rs -l app=dply
+
+kubectl rollout status deploy dply
+kubectl set image deploy dply nginx=nginx:1.7.9
+kubectl rollout history deploy dply
+
+kubectl rollout undo deploy nginx
+# wait a bit
+kubectl get po # select one 'Running' Pod
+kubectl describe po nginx-5ff4457d65-nslcl | grep -i image # should be nginx:1.7.8	
+
+kubectl rollout undo deploy dply --to-revision=2
+kubectl scale deploy nginx --replicas=5
+kubectl autoscale deploy dply --min=5 --max=10 --cpu-percent=80
+
+kubectl rollout pause deploy nginx
+
+kubectl set image deploy nginx nginx=nginx:1.9.1
+# or
+kubectl edit deploy nginx
+# change the image to nginx:1.9.1
+kubectl rollout history deploy nginx # no new revision
+
+kubectl rollout resume deploy nginx
+kubectl rollout history deploy nginx
+kubectl rollout history deploy nginx --revision=6 # insert the number of your latest revision
+
+kubectl create job pi  --image=perl -- perl -Mbignum=bpi -wle 'print bpi(2000)'
+job.spec.activeDeadlineSeconds=30
+Add job.spec.completions=5
+Add job.spec.parallelism=5
+kubectl create cronjob busybox --image=busybox --schedule="*/1 * * * *" -- /bin/sh -c 'date; echo Hello from the Kubernetes cluster'
+
+kubectl create configmap config1 --from-literal=foo=lala --from-literal=foo1=lolo
+kubectl create configmap config2 --from-file=config.txt
+kubectl create configmap config3 --from-env-file=config.env
+#get variables from file and assign key
+ kubectl create configmap config4 --from-file=special=config4.txt
+
+kubectl run ng --image=nginx --restart=Never --dry-run=client -o yaml > ng1.yaml 
+kubectl create configmap anotherone --from-literal=var6=val6 --from-literal=var7=val7
+
+    envFrom: # different than previous one, that was 'env'
+    - configMapRef: # different from the previous one, was 'configMapKeyRef'
+        name: anotherone # the name of the config map
+
+#securityContext
+spec:
+  securityContext: # insert this line
+    runAsUser: 101 # UID for the user
+
+#securitycontext capabilities
+    securityContext: # insert this line
+      capabilities: # and this
+        add: ["NET_ADMIN", "SYS_TIME"] # this as well
+
+kubectl run ng4 --image=nginx  --requests=cpu=100m,memory=256Mi --limits=cpu=200m,memory=512Mi =restart=Never --dry-run=client -o yaml > ng4.yaml
+
+kubectl create secret generic mysecret --from-literal=password=mypass
+
+kubectl create secret generic mysecret2 --from-file=username
+
+echo YWRtaW4= | base64 -d
+
+kubectl get serviceaccount
+
+kubectl create sa myuser
+
+kubectl run nginx --image=nginx --restart=Never --serviceaccount=myuser -o yaml --dry-run=client > pod.yaml
+kubectl apply -f pod.yaml
+
+#liveness
+    livenessProbe:
+     initialDelaySeconds: 5
+     periodSeconds: 5
+     exec:
+      command:
+      - ls
+
+kubectl run bb --image=busybox --restart=Never --dry-run=client --command -o yaml -- /bin/sh -c 'i=0; while true; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done' > pod3.yaml
+
+# inlficted error
+kubectl run busybox --restart=Never --image=busybox -- /bin/sh -c 'ls /notexist'
+
+kubectl run nginx --image=nginx --restart=Never --port=80 --expose
+kubectl run busybox --rm --image=busybox -it --restart=Never -- sh
+wget -O- IP:80
+
+
+kubectl create deploy foo --image=dgkanatsios/simpleapp --port=8080 --replicas=3
+
+kubectl run busybox --image=busybox --rm -it --restart=Never -- wget -O- 10.0.4.64:8080
+
+kubectl expose deployment foo --port=6262 --target-port=8080
+
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: access-nginx # pick a name
+spec:
+  podSelector:
+    matchLabels:
+      app: nginx # selector for the pods
+  ingress: # allow ingress traffic
+  - from:
+    - podSelector: # from pods
+        matchLabels: # with this label
+          access: granted
+
+kubectl run busybox --image=busybox --rm -it --restart=Never --labels=access=granted
+-- wget -O- http://ng:80 --timeout 2      
+
+CKAD
+kubectl get csr
+kubectl certificate approve <csrname>
+kubectl create role developer --resource=pods --verb=create,list,get,update,delete --namespace=development
+kubectl create rolebinding developer-role-binding --role=developer --name=john -n development
+# to check the role and role binding
+kubectl auth can-i update pods
+# run as another user
+kubectl auth can-i update pods --as=john
+#test service and pod
+kubectl run test-nslookup --image=busybox:1.28 --rm -it -- nslookup <servicename>
+# for pod name will not resolve. so use the IP and replace . (dot) with - (hypen)
+kubectl run test-nslookup --image=busybox:1.28 --rm -it -- nslookup 10-1-1-1.default.pod
+
+#check the status of kubelet
+systemctl status kubelet
+#get the confg file location from the output. --config
+# for creating static pod ensure that the file name and name of the pod is same.
+
+# for creating Cluster role and cluster role binding for service account prefix the name of the serviceaccount with system:serviceaccount:<serviceaccountname>
+
+#check connectivity
+nc -z -v -w 2 <servicename>
+
+# overide defaul kubeconfig
+kubectl cluster-info --kubeconfig=<path to the config file>
+
+# find and replace
+sed -i 's/<from string>/<to string>/g' filename.
+
+kubectl create clusterrole pvviewer-role --resource=persistentvolumes --verb=list
+
+# cluster role bindging for cluster role. in this case service account. in case of user replace service account with user
+kubectl create clusterrolebinding pvviewer-role-binding --clusterrole=pvviewer-role --serviceaccount=default:pvviewer
+
+kubectl create clusterrolebinding pvviewer-role-binding --clusterrole=pvviewer-role --user=default:pvviewer
+
+{
+kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}'
+or
+kubectl get nodes -o jsonpath='{.items[*].status.addresses[].address}'
+}
+
+Syntax: To Store a Key-Value pair
+$ ./etcdctl set key1 value1
+Syntax: To retrieve the stored data
+$ ./etcdctl get key1
+Syntax: To view more commands. Run etcdctl without any arguments
+$ ./etcdctl
+
+You can see the options with in the pod definition file located at /etc/kubernetes/manifests/kube-apiserver.yaml
+
+$ cat /etc/kubernetes/manifests/kube-apiserver.yaml
+
+#By default all controllers are enabled, but you can choose to enable specific one from kube-controller-manager.service
+cat /etc/systemd/system/kube-controller-manager.service
+
+#You can see the options for kube-scheduler in pod definition file that is located at /etc/kubernetes/manifests/kube-scheduler.yaml
+
+$ cat /etc/kubernetes/manifests/kube-scheduler.yaml
+
+Kubectl proxy
+
