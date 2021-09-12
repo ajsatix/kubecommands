@@ -1,0 +1,31 @@
+858  kubectl create configmap duration --from-literal=duration=10
+  859  kubectl create deployment busybox123 --image=busybox --record
+  860  kubectl create deployment busybox123 --image=busybox 
+  861  kubectl delete deployment busybox123 --image=busybox 
+  862  kubectl delete deployment busybox123 
+  863  kubectl create deployment busybox123 --image=busybox --replicas=1 --record
+  864  kubectl create deployment busybox123 --image=busybox --replicas=1 
+  865  kubectl scale deployment busbox123 --replicas=4 --record
+  866  kubectl scale deployment busybox123 --replicas=4 --record
+  867  kubectl rollout history
+  868  kubectl rollout history deploy busybox123
+  869  kubectl create role devops --resource=pods --verb=list --namespace=test
+  870  kubectl create rolebinding dvops-rb --role=devops --name=labsuser -n test
+  871  kubectl create rolebinding devops-rb --role=devops --name=labsuser -n test
+  872  kubectl create rolebinding devops-rb --role=devops --user=labsuser -n test
+  873  kubectl auth can-i list pods --as=labsuser -n test
+  874  kubectl auth can-i delete pods --as=labsuser -n test
+  875  kubectl get pods --as=labsuser -n test > rb.txt
+  876  cat rb.txt
+  877  kubectl create namespace dev
+  878  kubectl run busybox --rm --image=busybox --command --restart=Never --namespace=dev -- env > busytext.log
+  879  kubectl run busybox --image=busybox --command --restart=Never --namespace=dev -- env > busytext.log
+  880  cat busytext.log 
+  881  kubectl run busybox -it --image=busybox --command --restart=Never --namespace=dev -- env > busytext.log
+  882  kubectl delete pod busybox
+  883  kubectl run busybox -it --image=busybox --command --restart=Never --namespace=dev -- env > busytext.log
+  884  kubectl run double --image=nginx --restart=Never --dry-run=client -o yaml > ng1.yaml
+  885  vi ng1.yaml 
+  886  kubectl apply -f ng1.yaml 
+  887  kubectl get pods double
+  888  history
