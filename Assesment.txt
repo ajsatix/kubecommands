@@ -1,0 +1,11 @@
+1) Create a pod with name=nginx-web using image nginx:latest and deploy in the default namespace. Ensure that the pod is deployed in worker node1.
+2) Label worker node with the following labels node=wk1 , zone= south
+3)Create  a deployment redis-work on test namespace with port 6443 and expose it using a service redis-svc on Nodeport with port number 30234
+4)Create a pod test-pd with image k8s.gcr.io/test-webserver. Mount the /var/log folder of the node to /log folder inside the container. You need to use hostPath for this question.
+5) Change the image of the nginx pod created in question number 1. change the image to 1.7.1
+6) Create a config map with name duration and add a key and value duration=10 to the config map.
+7) create a deployment named busybox using busybox image and scale the deployment to 4 replicas . record the same
+8) Create a role devops to list resource ( pod) on the namespace test. Create the rolebindging for this devops role and bind it to labsuser, name of the role binding should be dvops-rb.
+once done , check if the user can list pods in the namsepace. Write the output of the kubectl command to ~/.rb.txt
+9) run a busybox pod on dev namespace and output the "env" variables of the container to console . pod should be removed after running. Redirect the logs to ~/.busytext.log
+10) create a pod named double. the pod should have two containers. container 1 should be redis. container 2 should be busybox.
