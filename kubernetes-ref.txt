@@ -18,7 +18,7 @@ kubectl create deployment redis-app --image=redis --replicas=3 --dry-run=client 
 
 kubectl run busybox --image=busybox --command --restart=Never --namespace=mynamespace -- env
 
-kubectl set-context --current --namespace=mynamespace
+kubectl config set-context --current --namespace=kasten-io
 
 kubectl run nginx --image=nginx --restart=Never --namespace=mynamespace -o yaml > nginx.yaml
 
