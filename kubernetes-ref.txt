@@ -94,6 +94,7 @@ kubectl describe deployment dply
 kubectl get rs -l app=dply
 
 kubectl rollout status deploy dply
+kubectl rollout restart deploy
 kubectl set image deploy dply nginx=nginx:1.7.9
 kubectl rollout history deploy dply
 
