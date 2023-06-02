@@ -267,3 +267,5 @@ $ cat /etc/kubernetes/manifests/kube-scheduler.yaml
 
 Kubectl proxy
 
+#modify service account of deployment 
+kubectl set serviceaccount deploy/web-dashboard dashboard-sa
